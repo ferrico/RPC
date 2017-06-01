@@ -55,46 +55,53 @@ public :
    	
    	float clsCut = 3;
    	float rangestrips = 4;
-   	int cluSize_1[5][2][12] = {0};
-   	int cluSize_2[5][2][12] = {0};
-   	int BX_1[5][2][12] = {0};
-   	int BX_2[5][2][12] = {0};
-   	float stripw_1[5][2][12] = {0};
-   	float stripw_2[5][2][12] = {0};
-   	float min_layer_1 = 20;
-	float min_layer_2 = 20;
-	float dist_layer_1;
-	float dist_layer_2;
-	bool DT_layer_1 = false;
-	bool DT_layer_2 = false;
-	bool RPC_layer_1 = false;
-	bool RPC_layer_2 = false;
-	int DT_segment = 0;
-	int RPC_segment = 0;
-	int RPC_segment_1 = 0;
-	int RPC_segment_5 = 0;
+   	int RPC_cluSize[2][5][2][12] = {0};
+   	int RPC_BX[2][5][2][12] = {0};
+   	float stripw[2][5][2][12] = {0};
+   	float min_layer[2] = {20};
+	float dist_layer[2];
+// 	bool DT_layer_1 = false;
+// 	bool DT_layer_2 = false;
+// 	bool RPC_layer_1 = false;
+// 	bool RPC_layer_2 = false;
+// 	int DT_segment = 0;
+// 	int RPC_segment = 0;
+// 	int RPC_segment_1 = 0;
+// 	int RPC_segment_5 = 0;
+// 	float RPC_x_loc_1[5][2][12] = {0};
+// 	float RPC_x_loc_2[5][2][12] = {0};
 	
-	int den_1[5][2][12] = {0};
-	int den_2[5][2][12] = {0};
+
+	float DT_glob_phi[2][5][2][12] = {0};
+	float RPC_glob_phi[2][5][2][12] = {0};
+	
+	float DT_glob_x[2][5][2][12] = {0};
+	float RPC_glob_x[2][5][2][12] = {0};
+
+	float DT_glob_y[2][5][2][12] = {0};
+	float RPC_glob_y[2][5][2][12] = {0};
+
+	
+	int den[2][5][2][12] = {0};
+
 	int num_1[5][2][12] = {0};
 	int num_2[5][2][12] = {0};
 	float eff[5][2][12] = {0};
-	float dist_1[5][2][12] = {0};
-	float dist_2[5][2][12] = {0};
+	float RPC_DT_dist[2][5][2][12] = {0};
 	
-	int rpc_ring_1;
-	int rpc_station_1;
-	int rpc_sector_1;
-	int rpc_ring_2;
-	int rpc_station_2;
-	int rpc_sector_2;
+	int rpc_ring_layer[2];
+	int rpc_station_layer[2];
+	int rpc_sector_layer[2];
 	
-	int dt_ring_1;
-	int dt_station_1;
-	int dt_sector_1;
-	int dt_ring_2;
-	int dt_station_2;
-	int dt_sector_2;
+	int dt_ring;
+	int dt_station;
+	int dt_sector;
+	
+	float DT_phi_bending, RPC_phi_bending;
+	
+	float fit_min;
+	float fit_max;
+
 	
 	TH1F *h_dist_DT_muon = new TH1F("Distance DT segment from muon", "Distance DT segment from muon", 100, 0, 10);
 	
@@ -131,7 +138,26 @@ public :
 	TH1F *h_den_phi_station_1 = new TH1F("Denominator for #phi on station 1", "Denominator for #phi on station 1", 60, -3.14, 3.14);
 	TH1F *h_den_phi_station_2 = new TH1F("Denominator for #phi on station 2", "Denominator for #phi on station 2", 60, -3.14, 3.14);
 
+	TH1F *h_MB1_phi_RPC = new TH1F("#phi MB1 RPC", "#phi MB1 RPC", 60, -3.14, 3.14);
+	TH1F *h_MB2_phi_RPC = new TH1F("#phi MB2 RPC", "#phi MB2 RPC", 60, -3.14, 3.14);
+	TH1F *h_MB1_phi_DT = new TH1F("#phi MB1 DT", "#phi MB1 DT", 60, -3.14, 3.14);
+	TH1F *h_MB2_phi_DT = new TH1F("#phi MB2 DT", "#phi MB2 DT", 60, -3.14, 3.14);
+	
+	TH1F *h_phi_residuals_MB1 = new TH1F("#phi residuals MB1", "#phi residuals MB1", 50, -0.5, 0.5);
+	TH1F *h_phi_residuals_MB2 = new TH1F("#phi residuals MB2", "#phi residuals MB2", 50, -0.5, 0.5);
 
+	TH1F *h_MB1_phi_bending_RPC = new TH1F("#phi bending MB1 RPC", "#phi bending MB1 RPC", 100, -10, 10);
+	TH1F *h_MB2_phi_bending_RPC = new TH1F("#phi bending MB2 RPC", "#phi bending MB2 RPC", 100, -10, 10);
+	TH1F *h_MB1_phi_bending_DT = new TH1F("#phi bending MB1 DT", "#phi bending MB1 DT", 100, -10, 10);
+	TH1F *h_MB2_phi_bending_DT = new TH1F("#phi bending MB2 DT", "#phi bending MB2 DT", 100, -10, 10);
+
+	TH1F *h_residuals_MB1_phi_bending = new TH1F("#phi bending residuals MB1", "#phi bending residuals MB1", 50, -5, 5);
+	TH1F *h_residuals_MB2_phi_bending = new TH1F("#phi bending residuals MB2", "#phi bending residuals MB2", 50, -5, 5);
+
+	TH2F *h_phi_RPC_vs_DT_MB1 = new TH2F("#phi: RPC vs DT MB1", "#phi: RPC vs DT MB1", 60, -3.14, 3.14, 60, -3.14, 3.14);
+	TH2F *h_phi_RPC_vs_DT_MB2 = new TH2F("#phi: RPC vs DT MB2", "#phi: RPC vs DT MB2", 60, -3.14, 3.14, 60, -3.14, 3.14);
+	TH2F *h_phiB_RPC_vs_DT_MB1 = new TH2F("#phiB: RPC vs DT MB1", "#phiB: RPC vs DT MB1", 60, -3.14, 3.14, 60, -3.14, 3.14);
+	TH2F *h_phiB_RPC_vs_DT_MB2 = new TH2F("#phiB: RPC vs DT MB2", "#phiB: RPC vs DT MB2", 60, -3.14, 3.14, 60, -3.14, 3.14);
 	
    // Declaration of leaf types
    Int_t           runnumber;
@@ -357,6 +383,7 @@ public :
    vector<float>   *RpcRechitTwinMuxGlobX;
    vector<float>   *RpcRechitTwinMuxGlobY;
    vector<float>   *RpcRechitTwinMuxGlobZ;
+   vector<float>   *RpcRechitTwinMuxGlobPhi;
    vector<float>   *DTextrapolatedOnRPCBX;
    vector<float>   *DTextrapolatedOnRPCLocX;
    vector<float>   *DTextrapolatedOnRPCLocY;
@@ -599,6 +626,7 @@ public :
    TBranch        *b_RpcRechitTwinMuxGlobX;   //!
    TBranch        *b_RpcRechitTwinMuxGlobY;   //!
    TBranch        *b_RpcRechitTwinMuxGlobZ;   //!
+   TBranch        *b_RpcRechitTwinMuxGlobPhi;   //!
    TBranch        *b_DTextrapolatedOnRPCBX;   //!
    TBranch        *b_DTextrapolatedOnRPCLocX;   //!
    TBranch        *b_DTextrapolatedOnRPCLocY;   //!
@@ -637,8 +665,10 @@ RPC_studies::RPC_studies(TTree *tree) : fChain(0)
 // used to generate this class and read the Tree.
    if (tree == 0) {
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/afs/cern.ch/work/f/ferrico/private/DT_update/CMSSW_9_0_0_pre4/src/UserCode/DTDPGAnalysis/test/crab/crab_RPC_efficiency_283820/results/DTNtuple.root");
+//       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/afs/cern.ch/work/f/ferrico/private/DT_update/CMSSW_9_0_0_pre4/src/UserCode/DTDPGAnalysis/test/crab/crab_RPC_efficiency_RunH_v2_2/results/DTNtuple.root");
       if (!f || !f->IsOpen()) {
          f = new TFile("/afs/cern.ch/work/f/ferrico/private/DT_update/CMSSW_9_0_0_pre4/src/UserCode/DTDPGAnalysis/test/crab/crab_RPC_efficiency_283820/results/DTNtuple.root");
+//          f = new TFile("/afs/cern.ch/work/f/ferrico/private/DT_update/CMSSW_9_0_0_pre4/src/UserCode/DTDPGAnalysis/test/crab/crab_RPC_efficiency_RunH_v2_2/results/DTNtuple.root");
       }
       f->GetObject("DTTree",tree);
 
@@ -868,6 +898,7 @@ void RPC_studies::Init(TTree *tree)
    RpcRechitTwinMuxGlobX = 0;
    RpcRechitTwinMuxGlobY = 0;
    RpcRechitTwinMuxGlobZ = 0;
+   RpcRechitTwinMuxGlobPhi = 0;
    DTextrapolatedOnRPCBX = 0;
    DTextrapolatedOnRPCLocX = 0;
    DTextrapolatedOnRPCLocY = 0;
@@ -1113,6 +1144,7 @@ void RPC_studies::Init(TTree *tree)
    fChain->SetBranchAddress("RpcRechitTwinMuxGlobX", &RpcRechitTwinMuxGlobX, &b_RpcRechitTwinMuxGlobX);
    fChain->SetBranchAddress("RpcRechitTwinMuxGlobY", &RpcRechitTwinMuxGlobY, &b_RpcRechitTwinMuxGlobY);
    fChain->SetBranchAddress("RpcRechitTwinMuxGlobZ", &RpcRechitTwinMuxGlobZ, &b_RpcRechitTwinMuxGlobZ);
+   fChain->SetBranchAddress("RpcRechitTwinMuxGlobPhi", &RpcRechitTwinMuxGlobPhi, &b_RpcRechitTwinMuxGlobPhi);
    fChain->SetBranchAddress("DTextrapolatedOnRPCBX", &DTextrapolatedOnRPCBX, &b_DTextrapolatedOnRPCBX);
    fChain->SetBranchAddress("DTextrapolatedOnRPCLocX", &DTextrapolatedOnRPCLocX, &b_DTextrapolatedOnRPCLocX);
    fChain->SetBranchAddress("DTextrapolatedOnRPCLocY", &DTextrapolatedOnRPCLocY, &b_DTextrapolatedOnRPCLocY);
